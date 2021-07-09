@@ -1,23 +1,25 @@
 package com.example.slidingnumbers
 
-import android.opengl.Visibility
+import android.graphics.Color
+import android.util.Log.d
 import android.view.LayoutInflater
-import android.view.View.GONE
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewbinding.ViewBinding
 import com.example.slidingnumbers.databinding.NumberViewBinding
 import com.example.slidingnumbers.models.Brick
 
 
 class TableAdapter(
-    private var bricks: MutableList<Int>,
+    private var list: MutableList<Int>,
     private val clickListener: BrickClickListener
 ) : RecyclerView.Adapter<TableAdapter.NumberViewHolder>() {
-    fun setItem(list: MutableList<Int>) {
-        bricks.clear()
-        bricks.addAll(list)
+
+    private var positionEmpty = 0
+    private var positionBrick = 0
+
+    fun setList(list: MutableList<Int>){
+        this.list = list
+        d("ADAPTER SETITEM", list.joinToString(" ,"))
         notifyDataSetChanged()
     }
 
@@ -30,20 +32,27 @@ class TableAdapter(
         holder.bind()
     }
 
-    override fun getItemCount() = bricks.size
+    override fun getItemCount() = list.size
 
     inner class NumberViewHolder(private val binding: NumberViewBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        private var model = 0
+        private var value = 0
         fun bind() {
-            if (bricks[adapterPosition] == 9) {
-                binding.root.isVisible = false
+            if (list[adapterPosition] == 0) {
+                positionEmpty = adapterPosition
+                binding.tvNumber.text = ""
             } else {
-                model = bricks[adapterPosition]
-                binding.tvNumber.text = model.toString()
+                value = list[adapterPosition]
+                binding.tvNumber.text = value.toString()
                 binding.root.setOnClickListener {
-                    //TODO
-                    clickListener.onBrickClick(Brick(model))
+                    positionBrick = adapterPosition
+
+                    clickListener.onBrickClick(Brick(value, positionBrick, positionEmpty))
+                }
+
+                /** check if the brick is positioned correctly and change color*/
+                if(value == adapterPosition + 1) {
+                    binding.root.setBackgroundColor(Color.GREEN)
                 }
             }
         }
